@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Liar's Web</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #0d0d1a;
+        --panel: #16162a;
+        --panel-border: #2a2a4a;
+        --accent: #e040fb;
+        --accent2: #00e5ff;
+        --accent3: #69ff47;
+        --danger: #ff4569;
+        --gold: #ffd740;
+        --text: #e8e8ff;
+        --text-dim: #8888aa;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Nunito', sans-serif;
+        min-height: 100vh;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-image:
+          radial-gradient(ellipse at 20% 20%, rgba(100, 0, 180, 0.15) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 80%, rgba(0, 150, 200, 0.1) 0%, transparent 50%);
+      }
+
+      .game-title {
+        font-family: 'Fredoka One', cursive;
+        font-size: 2.5rem;
+        background: linear-gradient(135deg, #e040fb, #00e5ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 3px;
+        margin-bottom: 4px;
+        text-align: center;
+      }
+      .game-subtitle {
+        color: var(--text-dim);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 22px;
+        text-align: center;
+      }
+
+      .hidden { display: none !important; }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--panel-border);
+        border-radius: 20px;
+        padding: 22px;
+        margin-bottom: 14px;
+        width: 100%;
+        max-width: 460px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+      }
+
+      .panel-title {
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 14px;
+      }
+
+      /* Icon Picker */
+      .icon-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .icon-option {
+        font-size: 1.7rem;
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 12px;
+        background: #1e1e38;
+        border: 2px solid transparent;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        padding: 0;
+        box-shadow: none;
+        color: inherit;
+      }
+      .icon-option:hover { background: #272748; transform: scale(1.1); }
+      .icon-option.selected {
+        border-color: var(--accent);
+        background: rgba(224, 64, 251, 0.18);
+        box-shadow: 0 0 14px rgba(224, 64, 251, 0.35);
+        transform: scale(1.12);
+      }
+
+      /* Input */
+      input[type="text"] {
+        width: 100%;
+        padding: 14px 16px;
+        background: #1e1e38;
+        border: 2px solid var(--panel-border);
+        border-radius: 12px;
+        color: var(--text);
+        font-size: 1rem;
+        font-family: 'Nunito', sans-serif;
+        font-weight: 700;
+        margin-bottom: 14px;
+        text-align: center;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      input[type="text"]:focus { border-color: var(--accent); }
+      input[type="text"]::placeholder { color: var(--text-dim); font-weight: 400; }
+
+      /* Buttons */
+      button {
+        width: 100%;
+        padding: 15px;
+        font-size: 1rem;
+        font-weight: 800;
+        font-family: 'Nunito', sans-serif;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        transition: transform 0.1s, box-shadow 0.15s;
+        letter-spacing: 0.5px;
+      }
+      button:active { transform: scale(0.97); }
+      button:disabled { opacity: 0.35; cursor: not-allowed; }
+
+      .btn-enter {
+        background: linear-gradient(135deg, #00e5ff, #0099bb);
+        color: #000;
+        box-shadow: 0 4px 20px rgba(0, 229, 255, 0.3);
+      }
+      .btn-start {
+        background: linear-gradient(135deg, #e040fb, #9900cc);
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(224, 64, 251, 0.3);
+      }
+      .btn-bet {
+        background: linear-gradient(135deg, #69ff47, #28a000);
+        color: #000;
+        box-shadow: 0 4px 18px rgba(105, 255, 71, 0.25);
+        margin-bottom: 10px;
+      }
+      .btn-liar {
+        background: linear-gradient(135deg, #ff4569, #bb0025);
+        color: #fff;
+        box-shadow: 0 4px 18px rgba(255, 69, 105, 0.3);
+      }
+
+      /* Player list in lobby */
+      .player-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: #1e1e38;
+        margin-bottom: 8px;
+        border: 1px solid transparent;
+        transition: border-color 0.3s, box-shadow 0.3s;
+      }
+      .player-item.is-turn {
+        border-color: var(--accent2);
+        box-shadow: 0 0 14px rgba(0, 229, 255, 0.18);
+      }
+      .player-icon-box {
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
+        background: #252548;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .player-name-text { font-weight: 700; font-size: 0.95rem; flex: 1; }
+      .poison-pips { display: flex; gap: 5px; }
+      .pip {
+        width: 11px; height: 11px;
+        border-radius: 50%;
+        background: #2a2a44;
+        border: 1px solid #444;
+      }
+      .pip.filled {
+        background: var(--danger);
+        border-color: var(--danger);
+        box-shadow: 0 0 6px rgba(255,69,105,0.5);
+      }
+
+      /* Dice */
+      .dice-container {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin: 10px 0;
+        flex-wrap: wrap;
+      }
+      .die {
+        width: 52px; height: 52px;
+        border-radius: 10px;
+        background: #fff;
+        color: #000;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.6);
+        animation: diceAppear 0.35s cubic-bezier(.34,1.56,.64,1) both;
+      }
+      @keyframes diceAppear {
+        from { transform: scale(0) rotate(-20deg); opacity: 0; }
+        to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+      }
+
+      /* Turn status */
+      #turnStatus {
+        font-family: 'Fredoka One', cursive;
+        font-size: 1.25rem;
+        text-align: center;
+        padding: 14px 16px;
+        border-radius: 14px;
+        margin-bottom: 12px;
+        letter-spacing: 0.5px;
+        transition: all 0.3s;
+      }
+      #turnStatus.my-turn {
+        background: rgba(105, 255, 71, 0.1);
+        border: 1px solid rgba(105, 255, 71, 0.35);
+        color: var(--accent3);
+        animation: pulseTurn 1.8s ease-in-out infinite;
+      }
+      #turnStatus.waiting {
+        background: rgba(136, 136, 170, 0.08);
+        border: 1px solid rgba(136, 136, 170, 0.18);
+        color: var(--text-dim);
+      }
+      @keyframes pulseTurn {
+        0%,100% { box-shadow: 0 0 0px rgba(105,255,71,0.15); }
+        50%      { box-shadow: 0 0 22px rgba(105,255,71,0.35); }
+      }
+
+      /* Player chips during game */
+      #playersInGame {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      .player-chip {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: #1e1e38;
+        border: 1px solid transparent;
+        font-size: 0.82rem;
+        font-weight: 700;
+        transition: all 0.25s;
+      }
+      .player-chip.active-turn {
+        border-color: var(--accent2);
+        background: rgba(0, 229, 255, 0.1);
+        box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+      }
+      .player-chip.eliminated { opacity: 0.3; text-decoration: line-through; }
+      .chip-skull { color: var(--danger); font-size: 0.75rem; }
+
+      /* Bet display */
+      .bet-display { text-align: center; padding: 10px 14px; }
+      .bet-who { font-size: 0.78rem; color: var(--text-dim); margin-bottom: 4px; font-weight: 600; }
+      .bet-big {
+        font-family: 'Fredoka One', cursive;
+        font-size: 2.2rem;
+        color: var(--accent);
+        letter-spacing: 3px;
+        line-height: 1;
+      }
+
+      /* Counters */
+      .counter-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 11px 14px;
+        background: #1e1e38;
+        border-radius: 12px;
+        margin-bottom: 10px;
+      }
+      .counter-label { font-size: 0.88rem; color: var(--text-dim); font-weight: 700; }
+      .counter-controls { display: flex; align-items: center; gap: 12px; }
+      .btn-circle {
+        width: 38px; height: 38px;
+        border-radius: 50%;
+        padding: 0;
+        font-size: 1.4rem;
+        font-weight: 800;
+        background: #272748;
+        color: var(--text);
+        border: 1px solid var(--panel-border);
+        box-shadow: none;
+      }
+      .counter-value { font-size: 1.5rem; font-weight: 800; min-width: 38px; text-align: center; }
+
+      /* Log area */
+      #logArea { min-height: 70px; max-height: 180px; overflow-y: auto; }
+      #logArea::-webkit-scrollbar { width: 4px; }
+      #logArea::-webkit-scrollbar-track { background: transparent; }
+      #logArea::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+      .log-entry {
+        padding: 5px 10px;
+        border-radius: 8px;
+        margin-bottom: 4px;
+        font-size: 0.88rem;
+        line-height: 1.5;
+      }
+      .log-info   { background: rgba(0, 229, 255, 0.07); color: #88ddff; }
+      .log-result { background: rgba(255, 69, 105, 0.08); color: #ff8899; }
+      .log-round  { background: rgba(105, 255, 71, 0.07); color: #99ff77; }
+
+      /* Reaction bar */
+      .reaction-bar {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 4px;
+      }
+      .btn-reaction {
+        width: auto;
+        padding: 8px 11px;
+        font-size: 1.35rem;
+        background: #1e1e38;
+        border: 1px solid var(--panel-border);
+        border-radius: 12px;
+        box-shadow: none;
+        transition: transform 0.12s, background 0.12s;
+        line-height: 1;
+      }
+      .btn-reaction:active { transform: scale(0.88); background: #272748; }
+
+      /* Floating emoji */
+      .float-reaction {
+        position: fixed;
+        font-size: 2.2rem;
+        pointer-events: none;
+        z-index: 1000;
+        animation: floatUp 2.6s ease-out forwards;
+        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+      }
+      @keyframes floatUp {
+        0%   { transform: translateY(0) scale(1.2); opacity: 1; }
+        15%  { transform: translateY(-20px) scale(1); opacity: 1; }
+        80%  { opacity: 0.9; }
+        100% { transform: translateY(-220px) scale(0.4); opacity: 0; }
+      }
+
+      /* Game over overlay */
+      #gameOverOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.88);
+        backdrop-filter: blur(8px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 500;
+        padding: 20px;
+      }
+      .gameover-trophy { font-size: 5rem; margin-bottom: 10px; animation: bounceIn 0.5s cubic-bezier(.34,1.56,.64,1); }
+      .gameover-title {
+        font-family: 'Fredoka One', cursive;
+        font-size: 2.4rem;
+        background: linear-gradient(135deg, #ffd740, #ff9800);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 6px;
+        text-align: center;
+      }
+      .gameover-winner { font-size: 1.4rem; font-weight: 800; color: var(--text); margin-bottom: 28px; text-align: center; }
+      @keyframes bounceIn {
+        0%   { transform: scale(0); }
+        70%  { transform: scale(1.2); }
+        100% { transform: scale(1); }
+      }
+
+      hr.divider { border: 0; border-top: 1px solid #202038; margin: 14px 0; }
+
+      @media (max-width: 360px) {
+        .game-title { font-size: 2rem; }
+        .die { width: 44px; height: 44px; font-size: 1.7rem; }
+        .icon-grid { grid-template-columns: repeat(6, 1fr); }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="game-title">🎲 LIAR'S WEB</div>
+    <div class="game-subtitle">O jogo da mentira &amp; da cerveja</div>
+
+    <!-- LOGIN -->
+    <div id="loginPanel" class="panel">
+      <div class="panel-title">Escolha seu ícone</div>
+      <div class="icon-grid" id="iconGrid"></div>
+      <input type="text" id="playerName" placeholder="Seu apelido" maxlength="12" />
+      <button class="btn-enter" onclick="join()">ENTRAR NO BAR</button>
+    </div>
+
+    <!-- LOBBY -->
+    <div id="lobbyPanel" class="panel hidden">
+      <div class="panel-title">Mesa de Jogadores</div>
+      <ul id="playersList" style="list-style:none; padding:0; margin-bottom:16px;"></ul>
+      <button class="btn-start" onclick="start()">⚡ COMEÇAR PARTIDA</button>
+    </div>
+
+    <!-- GAME -->
+    <div id="gamePanel" class="panel hidden">
+      <div id="turnStatus" class="waiting">Aguardando...</div>
+
+      <div id="playersInGame"></div>
+
+      <!-- My dice -->
+      <div class="panel" style="background:#0f1f18; border-color:#1a3528; margin-bottom:10px; padding:16px;">
+        <div class="panel-title">Seus Dados</div>
+        <div id="myDice" class="dice-container"></div>
+        <div id="myPoisons" style="color:var(--danger); font-size:0.85rem; font-weight:800; margin-top:4px; min-height:1.2em;"></div>
+      </div>
+
+      <!-- Current bet -->
+      <div class="panel" style="background:#130f20; border-color:#281840; margin-bottom:14px; padding:16px;">
+        <div class="panel-title">Aposta Atual</div>
+        <div class="bet-display">
+          <div id="betWho" class="bet-who">aguardando primeira aposta...</div>
+          <div id="currentBetDisplay" class="bet-big">—</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div id="actionControls" class="hidden">
+        <div class="counter-row">
+          <span class="counter-label">Quantidade</span>
+          <div class="counter-controls">
+            <button class="btn-circle" onclick="changeQty(-1)">−</button>
+            <span id="lblQty" class="counter-value">1</span>
+            <button class="btn-circle" onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+        <div class="counter-row">
+          <span class="counter-label">Face do Dado</span>
+          <div class="counter-controls">
+            <button class="btn-circle" onclick="changeFace(-1)">−</button>
+            <span id="lblFace" class="counter-value">⚁</span>
+            <button class="btn-circle" onclick="changeFace(1)">+</button>
+          </div>
+        </div>
+        <button class="btn-bet" onclick="placeBet()">✓ CONFIRMAR APOSTA</button>
+        <button class="btn-liar" onclick="callLiar()">🔥 CHAMAR MENTIROSO!</button>
+      </div>
+
+      <hr class="divider" />
+      <div id="logArea"></div>
+
+      <hr class="divider" />
+      <div class="panel-title">Reações</div>
+      <div class="reaction-bar" id="reactionBar"></div>
+    </div>
+
+    <!-- Game Over Overlay -->
+    <div id="gameOverOverlay" class="hidden">
+      <div class="gameover-trophy">🏆</div>
+      <div class="gameover-title">FIM DE JOGO!</div>
+      <div class="gameover-winner" id="gameOverWinner"></div>
+      <button class="btn-enter" style="max-width:260px;" onclick="location.reload()">JOGAR NOVAMENTE</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const ICONS = ['🐺','🦊','🐸','🐻','🦁','🐯','🐼','🦝','🦋','🌮','🎭','👑','💀','🔥','⚡','🌙','🎸','🏴‍☠️','🍺','🎯','🃏','🎲','👾','🤡'];
+      const REACTIONS = ['😂','😱','🔥','💀','🍺','👏','🤡','😤','🎉','💩'];
+      const diceGlyphs = ['?','⚀','⚁','⚂','⚃','⚄','⚅'];
+
+      const socket = io();
+      let myId = null;
+      let selectedIcon = ICONS[0];
+      let selectedQty = 1;
+      let selectedFace = 2;
+      let allPlayers = {};
+
+      // Audio
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        if (type === 'shake') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(350, audioCtx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+          osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        } else if (type === 'poison') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+          osc.frequency.linearRampToValueAtTime(60, audioCtx.currentTime + 0.6);
+          gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6);
+          osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+        } else if (type === 'bet') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+          osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.05);
+          gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15);
+          osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+        }
+      }
+
+      // Build icon picker
+      const iconGrid = document.getElementById('iconGrid');
+      ICONS.forEach(icon => {
+        const btn = document.createElement('button');
+        btn.className = 'icon-option' + (icon === selectedIcon ? ' selected' : '');
+        btn.textContent = icon;
+        btn.onclick = () => {
+          document.querySelectorAll('.icon-option').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedIcon = icon;
+        };
+        iconGrid.appendChild(btn);
+      });
+
+      // Build reaction bar
+      const reactionBar = document.getElementById('reactionBar');
+      REACTIONS.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-reaction';
+        btn.textContent = emoji;
+        btn.onclick = () => socket.emit('sendReaction', emoji);
+        reactionBar.appendChild(btn);
+      });
+
+      // Socket
+      socket.on('connect', () => { myId = socket.id; });
+
+      function join() {
+        const name = document.getElementById('playerName').value.trim();
+        if (!name) return;
+        socket.emit('joinGame', { name, icon: selectedIcon });
+        document.getElementById('loginPanel').classList.add('hidden');
+        document.getElementById('lobbyPanel').classList.remove('hidden');
+      }
+
+      function start() { socket.emit('startGame'); }
+
+      socket.on('updatePlayers', (players) => {
+        allPlayers = {};
+        players.forEach(p => { allPlayers[p.id] = p; });
+        document.getElementById('playersList').innerHTML = players.map(p => `
+          <li class="player-item">
+            <div class="player-icon-box">${p.icon || '🎲'}</div>
+            <div class="player-name-text">${p.name}</div>
+            <div class="poison-pips">
+              <div class="pip ${p.poisons >= 1 ? 'filled' : ''}"></div>
+              <div class="pip ${p.poisons >= 2 ? 'filled' : ''}"></div>
+            </div>
+          </li>
+        `).join('');
+      });
+
+      socket.on('gameStarted', (dice) => {
+        playSound('shake');
+        document.getElementById('lobbyPanel').classList.add('hidden');
+        document.getElementById('gamePanel').classList.remove('hidden');
+        document.getElementById('myDice').innerHTML = dice.map((d, i) =>
+          `<div class="die" style="animation-delay:${i * 0.07}s">${diceGlyphs[d]}</div>`
+        ).join('');
+        addLog('Rodada iniciada! Boa sorte. 🎲', 'round');
+      });
+
+      socket.on('updateTurn', (turnId) => {
+        const isMyTurn = turnId === myId;
+        const status = document.getElementById('turnStatus');
+        const turnPlayer = allPlayers[turnId];
+        if (isMyTurn) {
+          status.textContent = '🚨 SUA VEZ DE JOGAR!';
+          status.className = 'my-turn';
+        } else {
+          const label = turnPlayer ? `${turnPlayer.icon || ''} ${turnPlayer.name}` : '?';
+          status.textContent = `Vez de ${label}`;
+          status.className = 'waiting';
+        }
+        document.getElementById('actionControls').classList.toggle('hidden', !isMyTurn);
+        renderChips(turnId);
+      });
+
+      function renderChips(activeTurnId) {
+        document.getElementById('playersInGame').innerHTML = Object.values(allPlayers).map(p => `
+          <div class="player-chip ${p.id === activeTurnId ? 'active-turn' : ''} ${p.poisons >= 2 ? 'eliminated' : ''}">
+            ${p.icon || '🎲'} ${p.name}${p.poisons > 0 ? ` <span class="chip-skull">${'☠'.repeat(p.poisons)}</span>` : ''}
+          </div>
+        `).join('');
+      }
+
+      function changeQty(amount) {
+        selectedQty = Math.max(1, selectedQty + amount);
+        document.getElementById('lblQty').textContent = selectedQty;
+        playSound('bet');
+      }
+
+      function changeFace(amount) {
+        selectedFace += amount;
+        if (selectedFace > 6) selectedFace = 1;
+        if (selectedFace < 1) selectedFace = 6;
+        document.getElementById('lblFace').textContent = diceGlyphs[selectedFace];
+        playSound('bet');
+      }
+
+      function placeBet() { socket.emit('placeBet', { quantity: selectedQty, face: selectedFace }); }
+      function callLiar() { socket.emit('callLiar'); }
+
+      socket.on('betPlaced', (bet, player) => {
+        playSound('bet');
+        const label = player ? `${player.icon || ''} ${player.name}` : '?';
+        document.getElementById('betWho').textContent = `${label} aposta:`;
+        document.getElementById('currentBetDisplay').textContent = `${bet.quantity} × ${diceGlyphs[bet.face]}`;
+        selectedQty = bet.quantity;
+        selectedFace = bet.face;
+        document.getElementById('lblQty').textContent = selectedQty;
+        document.getElementById('lblFace').textContent = diceGlyphs[selectedFace];
+        addLog(`${label} apostou: ${bet.quantity} × ${diceGlyphs[bet.face]}`, 'info');
+      });
+
+      socket.on('revealDice', (playersObj) => {
+        addLog('🎲 Revelando a mesa:', 'info');
+        Object.values(playersObj).forEach(p => {
+          if (p.poisons < 2) {
+            const dice = p.dice.map(d => diceGlyphs[d]).join(' ');
+            addLog(`${p.icon || ''} ${p.name}: [ ${dice} ]`, 'info');
+          }
+        });
+      });
+
+      socket.on('roundResult', (msg, playersObj) => {
+        playSound('poison');
+        addLog(msg, 'result');
+        allPlayers = {};
+        Object.values(playersObj).forEach(p => { allPlayers[p.id] = p; });
+        if (playersObj[myId]) {
+          const poisons = playersObj[myId].poisons;
+          document.getElementById('myPoisons').textContent = poisons > 0 ? `☠ ${poisons}/2 venenos` : '';
+        }
+      });
+
+      socket.on('playerEliminated', (name) => {
+        addLog(`💀 ${name} foi eliminado!`, 'result');
+      });
+
+      socket.on('newRound', () => {
+        document.getElementById('betWho').textContent = 'aguardando primeira aposta...';
+        document.getElementById('currentBetDisplay').textContent = '—';
+        addLog('⚡ Nova rodada começando...', 'round');
+        selectedQty = 1; selectedFace = 2;
+        document.getElementById('lblQty').textContent = selectedQty;
+        document.getElementById('lblFace').textContent = diceGlyphs[selectedFace];
+      });
+
+      socket.on('gameOver', (winner) => {
+        document.getElementById('gameOverWinner').textContent = `${winner} sobreviveu!`;
+        document.getElementById('gameOverOverlay').classList.remove('hidden');
+      });
+
+      socket.on('reaction', ({ emoji, playerName }) => {
+        const x = 15 + Math.random() * 70;
+        const el = document.createElement('div');
+        el.className = 'float-reaction';
+        el.textContent = emoji;
+        el.style.left = x + '%';
+        el.style.bottom = '100px';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 2700);
+        addLog(`${playerName} reagiu: ${emoji}`, 'info');
+      });
+
+      function addLog(text, type = 'info') {
+        const area = document.getElementById('logArea');
+        const div = document.createElement('div');
+        div.className = `log-entry log-${type}`;
+        div.textContent = text;
+        area.appendChild(div);
+        area.scrollTop = area.scrollHeight;
+        while (area.children.length > 25) area.removeChild(area.firstChild);
+      }
+
+      document.getElementById('playerName').addEventListener('keydown', e => {
+        if (e.key === 'Enter') join();
+      });
+    </script>
+  </body>
+</html>
