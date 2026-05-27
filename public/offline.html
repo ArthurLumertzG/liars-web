@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Liar's Web</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;800&display=swap" rel="stylesheet" />
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        background: #0d0d1a;
+        color: #e8e8ff;
+        font-family: 'Nunito', sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background-image:
+          radial-gradient(ellipse at 20% 20%, rgba(100,0,180,0.15) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 80%, rgba(0,150,200,0.1) 0%, transparent 50%);
+      }
+      .title {
+        font-family: 'Fredoka One', cursive;
+        font-size: 3rem;
+        background: linear-gradient(135deg, #e040fb, #00e5ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 3px;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+      .subtitle {
+        color: #8888aa;
+        font-size: 0.8rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 40px;
+      }
+      .card {
+        background: #16162a;
+        border: 1px solid #2a2a4a;
+        border-radius: 20px;
+        padding: 28px 32px;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      }
+      .icon { font-size: 3rem; margin-bottom: 14px; }
+      .card-title {
+        font-family: 'Fredoka One', cursive;
+        font-size: 1.4rem;
+        color: #ff4569;
+        margin-bottom: 10px;
+      }
+      .card-text {
+        color: #8888aa;
+        font-size: 0.92rem;
+        line-height: 1.7;
+      }
+      .card-text b { color: #e8e8ff; }
+      .url-box {
+        margin-top: 20px;
+        background: #1e1e38;
+        border: 1px solid #2a2a4a;
+        border-radius: 12px;
+        padding: 14px;
+        font-size: 0.85rem;
+        color: #8888aa;
+        line-height: 1.8;
+      }
+      .url-box code {
+        background: #252548;
+        color: #00e5ff;
+        padding: 2px 7px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 0.9em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="title">🎲 LIAR'S WEB</div>
+    <div class="subtitle">O jogo da mentira &amp; da cerveja</div>
+    <div class="card">
+      <div class="icon">😴</div>
+      <div class="card-title">Servidor Offline</div>
+      <div class="card-text">
+        O servidor só fica ativo quando o host está rodando o jogo no notebook.<br><br>
+        Peça a URL de hoje para quem vai hostar a partida.
+      </div>
+      <div class="url-box">
+        Para jogar, o host roda:<br>
+        <code>play.bat</code><br>
+        e compartilha o link do <b>ngrok</b> com o grupo.
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+@echo off
+echo Iniciando servidor Liar's Web...
+start "Liar's Web Server" node server.js
+timeout /t 2 /nobreak >nul
+echo Abrindo tunel ngrok...
+ngrok http 3000
