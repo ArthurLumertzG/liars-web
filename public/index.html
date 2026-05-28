@@ -502,7 +502,7 @@
       const REACTIONS = ['😂','😱','🔥','💀','🍺','👏','🤡','😤','🎉','💩'];
       const diceGlyphs = ['?','⚀','⚁','⚂','⚃','⚄','⚅'];
 
-      const socket = io();
+      const socket = io({ transports: ['polling'] });
       let myId = null;
       let selectedIcon = ICONS[0];
       let selectedQty = 1;
