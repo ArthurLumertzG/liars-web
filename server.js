@@ -4,7 +4,11 @@ const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+  pingTimeout: 8000,
+  pingInterval: 3000,
+  transports: ["polling"],
+});
 
 app.use(express.static("public"));
 
@@ -28,10 +32,21 @@ function nextTurn() {
 io.on("connection", (socket) => {
   console.log("Jogador conectado:", socket.id);
 
+  // Send current lobby state to anyone who connects
+  socket.emit("updatePlayers", Object.values(players));
+
   socket.on("joinGame", (payload) => {
     if (gameActive) return socket.emit("errorMsg", "Jogo já em andamento.");
     const name = (typeof payload === "string" ? payload : payload.name || "?").slice(0, 12);
     const icon = typeof payload === "object" && payload.icon ? String(payload.icon).slice(0, 8) : "🎲";
+
+    // Remove stale entry with same name (e.g. after F5 before old socket timed out)
+    const staleId = playerIds.find((id) => players[id] && players[id].name === name);
+    if (staleId) {
+      delete players[staleId];
+      playerIds = playerIds.filter((id) => id !== staleId);
+    }
+
     players[socket.id] = { id: socket.id, name, icon, dice: [], poisons: 0 };
     playerIds.push(socket.id);
     io.emit("updatePlayers", Object.values(players));

@@ -502,7 +502,11 @@
       const REACTIONS = ['😂','😱','🔥','💀','🍺','👏','🤡','😤','🎉','💩'];
       const diceGlyphs = ['?','⚀','⚁','⚂','⚃','⚄','⚅'];
 
-      const socket = io({ transports: ['polling'] });
+      const socket = io({
+        transports: ['polling'],
+        reconnectionAttempts: 5,
+        reconnectionDelay: 2000,
+      });
       let myId = null;
       let selectedIcon = ICONS[0];
       let selectedQty = 1;
@@ -566,15 +570,29 @@
       });
 
       // Socket
-      socket.on('connect', () => { myId = socket.id; });
 
       function join() {
         const name = document.getElementById('playerName').value.trim();
         if (!name) return;
+        sessionStorage.setItem('playerName', name);
+        sessionStorage.setItem('playerIcon', selectedIcon);
         socket.emit('joinGame', { name, icon: selectedIcon });
         document.getElementById('loginPanel').classList.add('hidden');
         document.getElementById('lobbyPanel').classList.remove('hidden');
       }
+
+      // Auto-rejoin after F5 if name was already set
+      socket.on('connect', () => {
+        myId = socket.id;
+        const savedName = sessionStorage.getItem('playerName');
+        const savedIcon = sessionStorage.getItem('playerIcon');
+        if (savedName) {
+          selectedIcon = savedIcon || ICONS[0];
+          socket.emit('joinGame', { name: savedName, icon: selectedIcon });
+          document.getElementById('loginPanel').classList.add('hidden');
+          document.getElementById('lobbyPanel').classList.remove('hidden');
+        }
+      });
 
       function start() { socket.emit('startGame'); }
 
@@ -691,6 +709,7 @@
       });
 
       socket.on('gameOver', (winner) => {
+        sessionStorage.clear();
         document.getElementById('gameOverWinner').textContent = `${winner} sobreviveu!`;
         document.getElementById('gameOverOverlay').classList.remove('hidden');
       });
